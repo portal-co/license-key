@@ -8,7 +8,7 @@ validate the license key over the Internet.
 * Does not require an Internet connection.
 * Easy to revoke specific license keys in a software update.
 * Not possible to disassemble an application to gain
-  insight into how to generate a 100% working key since 
+  insight into how to generate a 100% working key since
   the verification process doesn't check the whole license key.
 
 For more information, read [`Implementing a Partial Serial Number Verification System in Delphi`]
@@ -20,7 +20,7 @@ Every license key consists of a seed, a payload and a checksum.
 Each byte in the payload is an operation of the seed and an
 initialization vector. The 16-bit checksum is there to quickly check if
 the key is valid at all, while the seed is a 64-bit hash of something
-that identifies the license key owner such as an e-mail address or similar.  
+that identifies the license key owner such as an e-mail address or similar.
 
 The size of the payload depends on how big the initialization vector is.
 In the example below, we are using a 5-byte intitialization vector which
@@ -99,7 +99,7 @@ let mut verifier = Verifier::new(
 );
 
 // Block a specific seed.
-// You might want to do this if a key was leaked or the the 
+// You might want to do this if a key was leaked or the the
 // license key owner requested a refund.
 verifier.block(11111111_u64);
 
@@ -115,7 +115,7 @@ match verifier.verify(&key) {
 }
 ```
 
-[`Implementing a Partial Serial Number Verification System in Delphi`]: 
+[`Implementing a Partial Serial Number Verification System in Delphi`]:
 https://www.brandonstaggs.com/2007/07/26/implementing-a-partial-serial-number-verification-system-in-delphi
 */
 
@@ -132,7 +132,7 @@ pub trait KeyHasher {
 }
 
 /// Represents a license key serializer.
-pub trait Serializer {
+pub trait LicenseSD {
     /// Serializes a license key to a string.
     fn serialize(key: &LicenseKey) -> String;
 
@@ -142,9 +142,9 @@ pub trait Serializer {
 
 /// License key serializer for hex strings.
 pub struct HexFormat {}
-impl Serializer for HexFormat {
+impl LicenseSD for HexFormat {
     fn serialize(key: &LicenseKey) -> String {
-        hex::encode(key.get_bytes())
+        hex::encode_upper(key.get_bytes())
     }
 
     fn deserialize(input: &str) -> Vec<u8> {
@@ -168,16 +168,16 @@ impl LicenseKey {
     ///
     /// [`&str`]: https://doc.rust-lang.org/std/primitive.str.html
     /// [`Serializer`]: trait.Serializer.html
-    pub fn parse<T : Serializer>(input: &str) -> LicenseKey {
+    pub fn parse<T: LicenseSD>(input: &str) -> LicenseKey {
         LicenseKey::new(T::deserialize(input))
     }
 
-    /// Serializes the license key into a [`String`] by using the 
+    /// Serializes the license key into a [`String`] by using the
     /// provided [`Serializer`].
     ///
     /// [`String`]: https://doc.rust-lang.org/std/string/struct.String.html
     /// [`Serializer`]: trait.Serializer.html
-    pub fn serialize<T: Serializer>(&self) -> String {
+    pub fn serialize<T: LicenseSD>(&self) -> String {
         T::serialize(&self)
     }
 
@@ -360,8 +360,8 @@ fn calculate_checksum(key: &[u8]) -> [u8; 2] {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::KeyHasher;
     use crate::Generator;
+    use crate::KeyHasher;
 
     #[derive(Default)]
     pub struct TestHasher {}
