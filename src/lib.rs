@@ -140,7 +140,7 @@ pub trait LicenseSD {
     fn deserialize(input: &str) -> Vec<u8>;
 }
 
-/// License key serializer for hex strings.
+/// License key serializer/deserializer for hex strings.
 pub struct HexFormat {}
 impl LicenseSD for HexFormat {
     fn serialize(key: &LicenseKey) -> String {
