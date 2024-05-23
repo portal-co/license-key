@@ -121,6 +121,8 @@ https://www.brandonstaggs.com/2007/07/26/implementing-a-partial-serial-number-ve
 
 use std::convert::TryInto;
 
+use hex::FromHexError;
+
 const SEED_BYTE_LENGTH: u8 = 8;
 const CHECKSUM_BYTE_LENGTH: u8 = 2;
 const SEGMENT_BYTE_LENGTH: u8 = 1;
@@ -137,7 +139,7 @@ pub trait LicenseSD {
     fn serialize(key: &LicenseKey) -> String;
 
     /// Deserializes a license key into a byte vector.
-    fn deserialize(input: &str) -> Vec<u8>;
+    fn deserialize(input: &str) -> Result<Vec<u8>, FromHexError>;
 }
 
 /// License key serializer/deserializer for hex strings.
@@ -147,8 +149,8 @@ impl LicenseSD for HexFormat {
         hex::encode_upper(key.get_bytes())
     }
 
-    fn deserialize(input: &str) -> Vec<u8> {
-        hex::decode(input).unwrap()
+    fn deserialize(input: &str) -> Result<Vec<u8>, FromHexError> {
+        hex::decode(input)
     }
 }
 
@@ -168,8 +170,8 @@ impl LicenseKey {
     ///
     /// [`&str`]: https://doc.rust-lang.org/std/primitive.str.html
     /// [`Serializer`]: trait.Serializer.html
-    pub fn parse<T: LicenseSD>(input: &str) -> LicenseKey {
-        LicenseKey::new(T::deserialize(input))
+    pub fn parse<T: LicenseSD>(input: &str) -> Result<LicenseKey, FromHexError> {
+        Ok(LicenseKey::new(T::deserialize(input)?))
     }
 
     /// Serializes the license key into a [`String`] by using the
