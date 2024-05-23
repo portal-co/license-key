@@ -208,7 +208,7 @@ impl LicenseKey {
 }
 
 /// The license key generator.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Generator<T: KeyHasher> {
     hasher: T,
     iv: Vec<(u64, u64, u64)>,
@@ -246,7 +246,7 @@ impl<T: KeyHasher> Generator<T> {
 }
 
 /// Representation of a license key status.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Status {
     /// The license is valid.
     Valid,
@@ -260,7 +260,7 @@ pub enum Status {
 
 /// Represents a license key byte check
 /// that should be used during validation.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ByteCheck {
     pub ordinal: u8,
     pub a: u64,
@@ -281,7 +281,7 @@ impl ByteCheck {
 }
 
 /// The license key verifier.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Verifier<T: KeyHasher> {
     hasher: T,
     checks: Vec<ByteCheck>,
