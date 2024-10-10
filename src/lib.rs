@@ -264,7 +264,7 @@ pub enum Status {
 /// that should be used during validation.
 #[derive(Debug, Clone)]
 pub struct ByteCheck {
-    pub ordinal: u8,
+    pub ordinal: usize,
     pub a: u64,
     pub b: u64,
     pub c: u64,
@@ -272,7 +272,7 @@ pub struct ByteCheck {
 
 impl ByteCheck {
     /// Creates a new byte check.
-    pub fn new(ordinal: u8, iv: (u64, u64, u64)) -> Self {
+    pub fn new(ordinal: usize, iv: (u64, u64, u64)) -> Self {
         Self {
             ordinal,
             a: iv.0,
