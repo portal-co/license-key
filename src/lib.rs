@@ -44,8 +44,8 @@ use license_key::*;
 // DON'T USE THIS ONE. It's only for demonstrational purposes.
 struct DummyHasher { }
 impl KeyHasher for DummyHasher {
-    fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u8 {
-        ((seed ^ a ^ b ^ c) & 0xFF) as u8
+    fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u64 {
+        seed ^ a ^ b ^ c
     }
 }
 
@@ -82,8 +82,8 @@ use license_key::*;
 // Use the exact same hasher that we used when generating the key
 struct DummyHasher { }
 impl KeyHasher for DummyHasher {
-    fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u8 {
-        ((seed ^ a ^ b ^ c) & 0xFF) as u8
+    fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u64 {
+        seed ^ a ^ b ^ c
     }
 }
 
@@ -125,12 +125,12 @@ use hex::FromHexError;
 
 const SEED_BYTE_LENGTH: u8 = 8;
 const CHECKSUM_BYTE_LENGTH: u8 = 2;
-const SEGMENT_BYTE_LENGTH: u8 = 1;
+const SEGMENT_BYTE_LENGTH: u8 = 8;
 
 /// Represent a hasher that turns the seed and a part of the
 /// initialization vector into a license key byte.
 pub trait KeyHasher {
-    fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u8;
+    fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u64;
 }
 
 /// Represents a license key serializer.
@@ -188,12 +188,12 @@ impl LicenseKey {
         self.bytes.clone()
     }
 
-    pub(crate) fn get_byte(&self, ordinal: usize) -> Option<u8> {
+    pub(crate) fn get_byte(&self, ordinal: usize) -> Option<u64> {
         let index = SEED_BYTE_LENGTH as usize + (ordinal * SEGMENT_BYTE_LENGTH as usize);
         if index > self.bytes.len() - 3 {
             return None;
         }
-        Some(self.bytes[index])
+        Some(u64::from_be_bytes(self.bytes[index..][..8].try_into().ok()))
     }
 
     pub(crate) fn get_checksum(&self) -> &[u8] {
@@ -368,8 +368,8 @@ mod tests {
     #[derive(Default)]
     pub struct TestHasher {}
     impl KeyHasher for TestHasher {
-        fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u8 {
-            ((seed ^ a ^ b ^ c) & 0xFF) as u8
+        fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u64 {
+            seed ^ a ^ b ^ c
         }
     }
 
