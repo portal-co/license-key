@@ -9,7 +9,9 @@ keywords = ["license", "license-generator", "software-license"]
 edition = "2018"
 
 [dependencies]
+base2048 = { version = "2.0.2", optional = true }
 hex = "0.4.2"
+thiserror = "1.0.64"
 
 [dev-dependencies]
 criterion = "0.3"
@@ -20,3 +22,6 @@ name = "license_key"
 [[bench]]
 name = "generator"
 harness = false
+
+[features]
+base2048 = ["dep:base2048"]

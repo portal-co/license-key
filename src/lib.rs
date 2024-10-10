@@ -120,7 +120,7 @@ match verifier.verify(&key) {
 https://www.brandonstaggs.com/2007/07/26/implementing-a-partial-serial-number-verification-system-in-delphi
 */
 
-use std::convert::TryInto;
+use std::{convert::TryInto, error::Error};
 
 use hex::FromHexError;
 
@@ -140,7 +140,7 @@ pub trait LicenseSD {
     fn serialize(key: &LicenseKey) -> String;
 
     /// Deserializes a license key into a byte vector.
-    fn deserialize(input: &str) -> Result<Vec<u8>, FromHexError>;
+    fn deserialize(input: &str) -> Result<Vec<u8>, impl Error>;
 }
 
 /// License key serializer/deserializer for hex strings.
@@ -154,6 +154,28 @@ impl LicenseSD for HexFormat {
         hex::decode(input)
     }
 }
+
+#[cfg(feature = "base2048")]
+pub struct Base2048Format{
+
+}
+#[cfg(feature = "base2048")]
+impl LicenseSD for Base2048Format{
+    fn serialize(key: &LicenseKey) -> String {
+        base2048::encode(&key.get_bytes())
+    }
+
+    fn deserialize(input: &str) -> Result<Vec<u8>, impl Error> {
+        match base2048::decode(input){
+            Some(a) => Ok(a),
+            None => Err(B2048Error)
+        }
+    }
+}
+#[cfg(feature = "base2048")]
+#[derive(thiserror::Error, Debug)]
+#[error("failed to decode base2048")]
+struct B2048Error;
 
 /// Represents a generated or parsed license key.
 #[derive(Debug, Clone)]
@@ -171,8 +193,11 @@ impl LicenseKey {
     ///
     /// [`&str`]: https://doc.rust-lang.org/std/primitive.str.html
     /// [`Serializer`]: trait.Serializer.html
-    pub fn parse<T: LicenseSD>(input: &str) -> Result<LicenseKey, FromHexError> {
-        Ok(LicenseKey::new(T::deserialize(input)?))
+    pub fn parse<'a,T: LicenseSD + 'a>(input: &'a str) -> Result<LicenseKey, impl Error + 'a> {
+        Ok(LicenseKey::new(match T::deserialize(input){
+            Ok(a) => a,
+            Err(e) => return Err(e)
+        }))
     }
 
     /// Serializes the license key into a [`String`] by using the
