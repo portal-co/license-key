@@ -4,8 +4,8 @@ use license_key::*;
 // Don't use this one but implement something yourself.
 struct DummyHasher {}
 impl KeyHasher for DummyHasher {
-    fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u8 {
-        ((seed ^ a ^ b ^ c) & 0xFF) as u8
+    fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u64 {
+        seed ^ a ^ b ^ c
     }
 }
 

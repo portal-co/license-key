@@ -71,7 +71,8 @@ let key = generator.generate(1234567891011121314_u64);
 
 // Write the key in hex format to the console.
 // This will output something like: 112210F4B2D230A229552341B2E723
-println!("{}", key.serialize::<HexFormat>());
+eprintln!("{}", key.serialize::<HexFormat>());
+
 ```
 
 # Verifying a license key
@@ -104,7 +105,7 @@ let mut verifier = Verifier::new(
 verifier.block(11111111_u64);
 
 // Parse a key in hex format
-let key = LicenseKey::parse::<HexFormat>("112210F4B2D230A229552341E723");
+let key = LicenseKey::parse::<HexFormat>("112210F4B2D230A2112210F4B2D23029112210F4B2D23055112210F4B2D23023112210F4B2D230419DDA").unwrap();
 
 // Verify the license key
 match verifier.verify(&key) {
@@ -193,7 +194,9 @@ impl LicenseKey {
         if index > self.bytes.len() - 3 {
             return None;
         }
-        Some(u64::from_be_bytes(self.bytes[index..][..8].try_into().ok()))
+        Some(u64::from_be_bytes(
+            self.bytes[index..][..8].try_into().ok()?,
+        ))
     }
 
     pub(crate) fn get_checksum(&self) -> &[u8] {

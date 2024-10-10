@@ -4,8 +4,8 @@ use license_key::*;
 // Don't use this one but implement something yourself.
 struct DummyHasher {}
 impl KeyHasher for DummyHasher {
-    fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u8 {
-        ((seed ^ a ^ b ^ c) & 0xFF) as u8
+    fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u64 {
+        seed ^ a ^ b ^ c
     }
 }
 
@@ -25,7 +25,7 @@ pub fn main() {
     verifier.block(11111111_u64);
 
     // Verify a license key.
-    let key = LicenseKey::parse::<HexFormat>("112210F4B2D230A229552341E723");
+    let key = LicenseKey::parse::<HexFormat>("112210F4B2D230A229552341E723").unwrap();
     match verifier.verify(&key) {
         Status::Valid => println!("Key is valid!"),
         Status::Invalid => println!("Key is invalid!"),

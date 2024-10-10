@@ -4,10 +4,10 @@ use license_key::*;
 #[derive(Default)]
 struct MyHasher {}
 impl KeyHasher for MyHasher {
-    fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u8 {
+    fn hash(&self, seed: u64, a: u64, b: u64, c: u64) -> u64 {
         // For demonstrational purposes only.
         // You need to implement your own secret sauce.
-        ((seed ^ a ^ b ^ c) & 0xFF) as u8
+        seed ^ a ^ b ^ c
     }
 }
 
